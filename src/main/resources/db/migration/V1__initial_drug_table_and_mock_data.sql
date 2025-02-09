@@ -11,3 +11,7 @@ CREATE TABLE drugs
     updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted      BOOLEAN   DEFAULT FALSE
 );
+
+INSERT INTO drugs (name, manufacturer, batch_number, expiry_date, stock)
+VALUES ('Paracetamol', 'GSK', 'GSK001', '2025-12-31', 100),
+       ('Ibuprofen', 'Bayer', 'BAY001', '2025-12-31', 50);
