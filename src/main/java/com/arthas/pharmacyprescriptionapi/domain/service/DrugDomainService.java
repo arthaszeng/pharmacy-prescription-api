@@ -4,6 +4,8 @@ import com.arthas.pharmacyprescriptionapi.domain.model.DrugDomain;
 import com.arthas.pharmacyprescriptionapi.domain.repository.DrugRepositoryInterface;
 import com.arthas.pharmacyprescriptionapi.infrastructure.schema.DrugSchema;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,5 +20,15 @@ public class DrugDomainService {
 
         DrugSchema savedDrug = drugRepository.save(drug.toSchema());
         return DrugDomain.fromSchema(savedDrug);
+    }
+
+    public DrugDomain getDrugByBatchNumber(String batchNumber) {
+        return drugRepository.findByBatchNumber(batchNumber)
+                .map(DrugDomain::fromSchema)
+                .orElseThrow(() -> new IllegalArgumentException("Drug not found"));
+    }
+
+    public Page<DrugDomain> getAllDrugs(Pageable pageable) {
+        return drugRepository.findAll(pageable).map(DrugDomain::fromSchema);
     }
 }

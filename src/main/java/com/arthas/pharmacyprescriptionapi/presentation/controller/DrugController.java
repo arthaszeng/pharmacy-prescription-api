@@ -4,6 +4,8 @@ import com.arthas.pharmacyprescriptionapi.application.service.DrugApplicationSer
 import com.arthas.pharmacyprescriptionapi.presentation.dto.CreateDrugCommand;
 import com.arthas.pharmacyprescriptionapi.presentation.dto.DrugRepresentation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,5 +23,20 @@ public class DrugController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{batchNumber}")
+    public ResponseEntity<DrugRepresentation> getDrugByBatchNumber(@PathVariable String batchNumber) {
+        DrugRepresentation response = DrugRepresentation.fromDomain(
+                drugApplicationService.getDrugByBatchNumber(batchNumber)
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<DrugRepresentation>> getAllDrugs(Pageable pageable) {
+        Page<DrugRepresentation> drugs = drugApplicationService.getAllDrugs(pageable)
+                .map(DrugRepresentation::fromDomain);
+        return ResponseEntity.ok(drugs);
     }
 }

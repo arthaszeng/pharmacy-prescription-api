@@ -28,6 +28,31 @@ This project follows **Onion Architecture**, **Domain-Driven Design (DDD)**, and
 
 ---
 
+# 📌 RESTful API Capability Table
+
+## ✅ Implemented APIs
+
+| **Feature** | **HTTP Method** | **Endpoint** | **Request Parameters** | **Request Body** | **Response** |
+|------------|---------------|-------------|----------------|---------------|-------------|
+| **Add a Drug** | `POST` | `/api/drugs` | None | `{ "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` | `{ "id": 1, "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` |
+| **Get All Drugs (Paginated)** | `GET` | `/api/drugs?page=X&size=Y` | `page` (default: 0), `size` (default: 10) | None | `{ "content": [{ "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 100 }], "totalElements": 100, "totalPages": 10, "size": 10 }` |
+| **Get Drug by Batch Number** | `GET` | `/api/drugs/{batchNumber}` | `batchNumber` | None | `{ "id": 1, "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` |
+
+---
+
+## 📌 Planned APIs
+
+| **Feature** | **HTTP Method** | **Endpoint** | **Status** |
+|------------|---------------|-------------|----------|
+| **Update Drug Information** | `PUT` | `/api/drugs/{batchNumber}` | 🚧 Pending Implementation |
+| **Delete a Drug** | `DELETE` | `/api/drugs/{batchNumber}` | 🚧 Pending Implementation |
+| **Create a Prescription** | `POST` | `/api/prescriptions` | 🚧 Pending Implementation |
+| **Get Prescription by ID** | `GET` | `/api/prescriptions/{id}` | 🚧 Pending Implementation |
+| **Get All Prescriptions** | `GET` | `/api/prescriptions` | 🚧 Pending Implementation |
+| **Fulfill a Prescription (Drug Deduction)** | `POST` | `/api/prescriptions/{id}/fulfill` | 🚧 Pending Implementation |
+
+---
+
 ## 📦 Folder Structure
 
 The project follows the **Onion Architecture** with **Domain-Driven Design (DDD)** principles. Each entity has its own domain, application, infrastructure, and presentation layers.
