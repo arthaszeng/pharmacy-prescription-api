@@ -28,6 +28,46 @@ This project follows **Onion Architecture**, **Domain-Driven Design (DDD)**, and
 
 ---
 
+## 📦 Folder Structure
+
+The project follows the **Onion Architecture** with **Domain-Driven Design (DDD)** principles. Each entity has its own domain, application, infrastructure, and presentation layers.
+
+![inner-process-architecure.png](doc/inner-process-architecure.png)
+
+
+Below is an example of the project's folder structure for `Drug` entity:
+```
+java/com/arthas/pharmacyprescriptionapi
+ ├── domain
+ │   ├── model
+ │   │   ├── DrugDomain.java
+ │   ├── repository
+ │   │   ├── DrugRepositoryInterface.java
+ │   ├── service
+ │   │   ├── DrugDomainService.java
+ ├── application
+ │   ├── service
+ │   │   ├── DrugApplicationService.java
+ ├── infrastructure
+ │   ├── repository
+ │   │   ├── DrugRepositoryImpl.java
+ │   ├── schema
+ │   │   ├── DrugSchema.java
+ ├── presentation
+ │   ├── controller
+ │   │   ├── DrugController.java
+ │   ├── dto
+ │   │   ├── DrugRepresentation.java
+ │   │   ├── CreateDrugCommand.java
+ ├── tests
+ │   ├── application
+ │   │   ├── DrugApplicationServiceTest.java
+ │   ├── domain
+ │   │   ├── DrugDomainServiceTest.java
+ │   ├── dto
+ │   │   ├── DrugControllerTest.java
+ ```
+
 ## 🏗️ Setup Instructions
 ### 1️⃣ Prerequisites
 Ensure you have the following installed:
