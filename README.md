@@ -37,7 +37,7 @@ This project follows **Onion Architecture**, **Domain-Driven Design (DDD)**, and
 | **Add a Drug** | `POST` | `/api/drugs` | None | `{ "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` | `{ "id": 1, "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` |
 | **Get All Drugs (Paginated)** | `GET` | `/api/drugs?page=X&size=Y` | `page` (default: 0), `size` (default: 10) | None | `{ "content": [{ "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 100 }], "totalElements": 100, "totalPages": 10, "size": 10 }` |
 | **Get Drug by Batch Number** | `GET` | `/api/drugs/{batchNumber}` | `batchNumber` | None | `{ "id": 1, "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` |
-| **Retrieve All Pharmacies & Their Drugs** | `GET` | `/api/pharmacies` | None | None | `[ { "id": 1, "name": "Central Pharmacy", "drugs": [ { "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 100 } ] }, { "id": 2, "name": "Downtown Pharmacy", "drugs": [ { "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 30 } ] } ]` |
+| **Retrieve All Pharmacies (Paginated)** | `GET` | `/api/pharmacies` | `page=0&size=10` | None | `{ "content": [ { "id": 1, "name": "Central Pharmacy", "drugs": [ { "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 100 } ] }, { "id": 2, "name": "Downtown Pharmacy", "drugs": [ { "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 30 } ] } ], "totalElements": 25, "totalPages": 3, "size": 10, "number": 0 }` |
 
 ---
 
