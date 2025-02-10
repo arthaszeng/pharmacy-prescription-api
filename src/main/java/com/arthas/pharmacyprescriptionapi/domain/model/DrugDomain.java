@@ -22,6 +22,10 @@ public class DrugDomain {
     private LocalDateTime updatedAt;
     private boolean deleted;
 
+    public boolean isExpired() {
+        return expiryDate.before(new Date());
+    }
+
     public static DrugDomain fromSchema(DrugSchema schema) {
         return new DrugDomain(
                 schema.getId(),

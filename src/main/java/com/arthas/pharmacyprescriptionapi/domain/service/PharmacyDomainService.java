@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -63,6 +64,7 @@ public class PharmacyDomainService {
 
     private Map<Long, PharmacyDrugAllocationDomain> getAllocationMap(PharmacyDomain pharmacy) {
         return pharmacy.getAllocations().stream()
+                .filter(PharmacyDrugAllocationDomain::isActive)
                 .collect(Collectors.toMap(PharmacyDrugAllocationDomain::getDrugId, allocation -> allocation));
     }
 
@@ -78,6 +80,7 @@ public class PharmacyDomainService {
         PharmacyDrugAllocationDomain allocation = getValidAllocation(prescriptionDrug, allocationMap);
 
         allocation.setAllocatedStock(allocation.getAllocatedStock() - prescriptionDrug.getDosage());
+        allocation.setUpdatedAt(LocalDateTime.now());
 
         log.info("Deducted {} units of Drug ID {} from Pharmacy ID {}. Remaining stock: {}",
                 prescriptionDrug.getDosage(), prescriptionDrug.getDrugId(), allocation.getPharmacyId(), allocation.getAllocatedStock());

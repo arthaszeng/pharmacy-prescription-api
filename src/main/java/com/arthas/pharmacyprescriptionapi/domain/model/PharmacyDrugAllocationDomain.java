@@ -3,6 +3,9 @@ package com.arthas.pharmacyprescriptionapi.domain.model;
 import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacyDrugAllocationSchema;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,6 +16,8 @@ public class PharmacyDrugAllocationDomain {
     private PharmacyDomain pharmacy;
     private DrugDomain drug;
     private int allocatedStock;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static PharmacyDrugAllocationDomain fromSchema(PharmacyDrugAllocationSchema schema, boolean includePharmacy) {
         return PharmacyDrugAllocationDomain.builder()
@@ -20,6 +25,8 @@ public class PharmacyDrugAllocationDomain {
                 .pharmacy(includePharmacy ? PharmacyDomain.fromSchema(schema.getPharmacy(), false) : null)
                 .drug(DrugDomain.fromSchema(schema.getDrug()))
                 .allocatedStock(schema.getAllocatedStock())
+                .createdAt(schema.getCreatedAt())
+                .updatedAt(schema.getUpdatedAt())
                 .build();
     }
 
@@ -29,7 +36,13 @@ public class PharmacyDrugAllocationDomain {
                 .pharmacy(this.pharmacy.toSchema())
                 .drug(this.drug.toSchema())
                 .allocatedStock(this.allocatedStock)
+                .createdAt(Optional.ofNullable(this.createdAt).orElse(LocalDateTime.now()))
+                .updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    public static boolean isActive(PharmacyDrugAllocationDomain allocationDomain) {
+        return !allocationDomain.drug.isExpired() && allocationDomain.allocatedStock > 0;
     }
 
     public static Long getDrugId(PharmacyDrugAllocationDomain allocationDomain) {
