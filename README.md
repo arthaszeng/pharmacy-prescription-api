@@ -28,6 +28,11 @@ This project follows **Onion Architecture**, **Domain-Driven Design (DDD)**, and
 
 ---
 
+## ERD Diagram
+![ERD Diagram](doc/ERD.png)
+
+---
+
 ## 📌 RESTful API Capability Table
 
 ### ✅ Implemented APIs
