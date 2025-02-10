@@ -1,7 +1,10 @@
 package com.arthas.pharmacyprescriptionapi.infrastructure.schema;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -11,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "drugs")
+@Table(name = "DRUG")
 public class DrugSchema {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

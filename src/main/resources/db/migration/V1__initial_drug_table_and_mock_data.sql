@@ -1,5 +1,5 @@
 -- V1__initial_schema.sql
-CREATE TABLE drugs
+CREATE TABLE DRUG
 (
     id           SERIAL PRIMARY KEY,
     name         VARCHAR(255)        NOT NULL,
@@ -12,6 +12,6 @@ CREATE TABLE drugs
     deleted      BOOLEAN   DEFAULT FALSE
 );
 
-INSERT INTO drugs (name, manufacturer, batch_number, expiry_date, stock)
+INSERT INTO DRUG (name, manufacturer, batch_number, expiry_date, stock)
 VALUES ('Paracetamol', 'GSK', 'GSK001', '2025-12-31', 100),
        ('Ibuprofen', 'Bayer', 'BAY001', '2025-12-31', 50);
