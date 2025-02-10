@@ -39,9 +39,4 @@ public class PrescriptionSchema {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
-
-    public void addPrescriptionDrug(PrescriptionDrugSchema prescriptionDrug) {
-        prescriptionDrugs.add(prescriptionDrug);
-        prescriptionDrug.setPrescription(this);
-    }
 }

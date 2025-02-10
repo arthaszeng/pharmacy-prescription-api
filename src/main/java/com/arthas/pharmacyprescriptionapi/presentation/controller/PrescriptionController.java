@@ -5,10 +5,7 @@ import com.arthas.pharmacyprescriptionapi.presentation.dto.CreatePrescriptionCom
 import com.arthas.pharmacyprescriptionapi.presentation.dto.PrescriptionRepresentation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/prescriptions")
@@ -23,6 +20,14 @@ public class PrescriptionController {
                 prescriptionApplicationService.createPrescription(command.toDomain())
         );
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/fulfill")
+    public ResponseEntity<PrescriptionRepresentation> fulfillPrescription(@PathVariable Long id) {
+        PrescriptionRepresentation response = PrescriptionRepresentation.fromDomain(
+                prescriptionApplicationService.fulfillPrescription(id)
+        );
         return ResponseEntity.ok(response);
     }
 }

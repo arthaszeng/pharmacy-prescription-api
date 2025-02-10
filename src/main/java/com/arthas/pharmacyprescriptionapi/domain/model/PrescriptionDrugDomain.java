@@ -3,6 +3,8 @@ package com.arthas.pharmacyprescriptionapi.domain.model;
 import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PrescriptionDrugSchema;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +28,8 @@ public class PrescriptionDrugDomain {
                 .id(this.id)
                 .drug(this.drug.toSchema())
                 .dosage(this.dosage)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 

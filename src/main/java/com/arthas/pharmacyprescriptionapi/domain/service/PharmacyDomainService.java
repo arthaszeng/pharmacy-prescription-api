@@ -3,18 +3,20 @@ package com.arthas.pharmacyprescriptionapi.domain.service;
 import com.arthas.pharmacyprescriptionapi.domain.model.PharmacyDomain;
 import com.arthas.pharmacyprescriptionapi.domain.model.PharmacyDrugAllocationDomain;
 import com.arthas.pharmacyprescriptionapi.domain.model.PrescriptionDrugDomain;
+import com.arthas.pharmacyprescriptionapi.domain.repository.PharmacyDrugAllocationRepositoryInterface;
 import com.arthas.pharmacyprescriptionapi.domain.repository.PharmacyRepositoryInterface;
+import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacyDrugAllocationSchema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,51 +24,71 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PharmacyDomainService {
     private final PharmacyRepositoryInterface pharmacyRepository;
+    private final PharmacyDrugAllocationRepositoryInterface allocationRepository;
 
-    public PharmacyDomain getPharmacyById(Long id) {
-        return pharmacyRepository.findById(id)
-                .map(schema -> PharmacyDomain.fromSchema(schema, true))
-                .orElseThrow(() -> {
-                    log.warn("Pharmacy ID {} not found", id);
-                    return new NoSuchElementException("Pharmacy ID " + id + " does not exist.");
-                });
-    }
-
-    public List<PrescriptionDrugDomain> validateAndAllocateDrugs(PharmacyDomain pharmacy,
-                                                                 List<PrescriptionDrugDomain> requestedDrugs) {
-        // Convert pharmacy allocations to a lookup map (Drug ID -> Allocation)
-        Map<Long, PharmacyDrugAllocationDomain> allocationMap = pharmacy.getAllocations().stream()
-                .collect(Collectors.toMap(PharmacyDrugAllocationDomain::getDrugId, Function.identity()));
-
-        return requestedDrugs.stream()
-                .map(prescriptionDrug -> {
-                    Long drugId = prescriptionDrug.getDrugId();
-
-                    // Fetch allocation from preloaded map
-                    PharmacyDrugAllocationDomain allocation = Optional.ofNullable(allocationMap.get(drugId))
-                            .orElseThrow(() -> {
-                                log.warn("Pharmacy ID {} does not have drug ID {} allocated", pharmacy.getId(), drugId);
-                                return new NoSuchElementException("Pharmacy does not have drug ID " + drugId + " allocated.");
-                            });
-
-                    // Validate stock availability
-                    Optional.of(allocation)
-                            .filter(allocationDomain -> allocationDomain.getAllocatedStock() >= prescriptionDrug.getDosage())
-                            .orElseThrow(() -> {
-                                log.warn("Insufficient stock for drug ID {} in pharmacy ID {}", drugId, pharmacy.getId());
-                                return new IllegalArgumentException("Insufficient stock for drug ID " + drugId);
-                            });
-
-                    return PrescriptionDrugDomain.builder()
-                            .drug(allocation.getDrug())
-                            .dosage(prescriptionDrug.getDosage())
-                            .build();
-                })
-                .toList();
-    }
-
+    @Transactional(readOnly = true)
     public Page<PharmacyDomain> getAllPharmacies(Pageable pageable) {
         return pharmacyRepository.findAll(pageable)
                 .map(schema -> PharmacyDomain.fromSchema(schema, true));
+    }
+
+    @Transactional(readOnly = true)
+    public PharmacyDomain getPharmacyById(Long id) {
+        return pharmacyRepository.findById(id)
+                .map(schema -> PharmacyDomain.fromSchema(schema, true))
+                .orElseThrow(() -> new NoSuchElementException("Pharmacy ID " + id + " does not exist."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrescriptionDrugDomain> validateAndAllocateDrugs(PharmacyDomain pharmacy, List<PrescriptionDrugDomain> requestedDrugs) {
+        Map<Long, PharmacyDrugAllocationDomain> allocationMap = getAllocationMap(pharmacy);
+        return requestedDrugs.stream()
+                .map(drug -> allocateDrug(drug, allocationMap))
+                .toList();
+    }
+
+    @Transactional
+    public void validateAndDeductStock(PharmacyDomain pharmacy, List<PrescriptionDrugDomain> prescriptionDrugs) {
+        Map<Long, PharmacyDrugAllocationDomain> allocationMap = getAllocationMap(pharmacy);
+
+        // Validate & Deduct Stock
+        List<PharmacyDrugAllocationSchema> updatedAllocations = prescriptionDrugs.stream()
+                .map(drug -> deductStock(allocationMap, drug))
+                .map(PharmacyDrugAllocationDomain::toSchema)
+                .toList();
+
+        // Batch update allocations
+        allocationRepository.saveAll(updatedAllocations);
+    }
+
+    private Map<Long, PharmacyDrugAllocationDomain> getAllocationMap(PharmacyDomain pharmacy) {
+        return pharmacy.getAllocations().stream()
+                .collect(Collectors.toMap(PharmacyDrugAllocationDomain::getDrugId, allocation -> allocation));
+    }
+
+    private PrescriptionDrugDomain allocateDrug(PrescriptionDrugDomain prescriptionDrug, Map<Long, PharmacyDrugAllocationDomain> allocationMap) {
+        PharmacyDrugAllocationDomain allocation = getValidAllocation(prescriptionDrug, allocationMap);
+        return PrescriptionDrugDomain.builder()
+                .drug(allocation.getDrug())
+                .dosage(prescriptionDrug.getDosage())
+                .build();
+    }
+
+    private PharmacyDrugAllocationDomain deductStock(Map<Long, PharmacyDrugAllocationDomain> allocationMap, PrescriptionDrugDomain prescriptionDrug) {
+        PharmacyDrugAllocationDomain allocation = getValidAllocation(prescriptionDrug, allocationMap);
+
+        allocation.setAllocatedStock(allocation.getAllocatedStock() - prescriptionDrug.getDosage());
+
+        log.info("Deducted {} units of Drug ID {} from Pharmacy ID {}. Remaining stock: {}",
+                prescriptionDrug.getDosage(), prescriptionDrug.getDrugId(), allocation.getPharmacyId(), allocation.getAllocatedStock());
+
+        return allocation;
+    }
+
+    private static PharmacyDrugAllocationDomain getValidAllocation(PrescriptionDrugDomain prescriptionDrug,
+                                                                   Map<Long, PharmacyDrugAllocationDomain> allocationMap) {
+        return Optional.ofNullable(allocationMap.get(prescriptionDrug.getDrugId()))
+                .filter(allocation -> allocation.getAllocatedStock() >= prescriptionDrug.getDosage())
+                .orElseThrow(() -> new IllegalArgumentException("Insufficient or missing stock for Drug ID " + prescriptionDrug.getDrugId()));
     }
 }

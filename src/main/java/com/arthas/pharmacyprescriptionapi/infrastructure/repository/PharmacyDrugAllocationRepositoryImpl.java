@@ -5,11 +5,11 @@ import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacyDrugAllo
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface PharmacyDrugAllocationRepositoryImpl
         extends JpaRepository<PharmacyDrugAllocationSchema, Long>, PharmacyDrugAllocationRepositoryInterface {
-
-    Optional<PharmacyDrugAllocationSchema> findByPharmacyIdAndDrugId(Long pharmacyId, Long drugId);
+    @Override
+    List<PharmacyDrugAllocationSchema> saveAll(Iterable updatedAllocations);
 }

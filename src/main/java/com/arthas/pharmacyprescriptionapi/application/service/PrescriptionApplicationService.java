@@ -39,4 +39,19 @@ public class PrescriptionApplicationService {
 
         return prescriptionDomainService.createPrescription(completePrescription);
     }
+
+    @Transactional
+    public PrescriptionDomain fulfillPrescription(Long prescriptionId) {
+        PrescriptionDomain prescription = prescriptionDomainService.getPrescriptionById(prescriptionId);
+
+        if (!prescription.getStatus().equals("PENDING")) {
+            throw new IllegalArgumentException("Prescription ID " + prescriptionId + " is not pending fulfillment");
+        }
+
+        PharmacyDomain pharmacy = pharmacyDomainService.getPharmacyById(prescription.getPharmacy().getId());
+
+        pharmacyDomainService.validateAndDeductStock(pharmacy, prescription.getPrescriptionDrugs());
+
+        return prescriptionDomainService.fulfillPrescription(prescription);
+    }
 }

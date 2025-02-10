@@ -2,10 +2,8 @@ package com.arthas.pharmacyprescriptionapi.domain.repository;
 
 import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacyDrugAllocationSchema;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface PharmacyDrugAllocationRepositoryInterface {
-    Optional<PharmacyDrugAllocationSchema> findById(Long id);
-
-    Optional<PharmacyDrugAllocationSchema> findByPharmacyIdAndDrugId(Long pharmacyId, Long drugId);
+    List<PharmacyDrugAllocationSchema> saveAll(Iterable<PharmacyDrugAllocationSchema> updatedAllocations);
 }

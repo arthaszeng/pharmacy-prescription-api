@@ -27,4 +27,20 @@ public class PrescriptionDomainService {
             throw new RuntimeException("An unexpected error occurred while creating the prescription", e);
         }
     }
+
+
+    @Transactional
+    public PrescriptionDomain fulfillPrescription(PrescriptionDomain prescription) {
+        prescription.setStatus("FULFILLED");
+        PrescriptionSchema updatedSchema = prescriptionRepository.save(prescription.toSchema());
+        return PrescriptionDomain.fromSchema(updatedSchema);
+    }
+
+    @Transactional(readOnly = true)
+    public PrescriptionDomain getPrescriptionById(Long prescriptionId) {
+        PrescriptionSchema schema = prescriptionRepository.findById(prescriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Prescription ID " + prescriptionId + " does not exist."));
+
+        return PrescriptionDomain.fromSchema(schema);
+    }
 }

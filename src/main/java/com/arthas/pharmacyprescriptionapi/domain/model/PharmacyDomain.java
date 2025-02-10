@@ -28,7 +28,7 @@ public class PharmacyDomain {
                 .allocations(includeAllocations
                         ? Optional.ofNullable(schema.getAllocations())
                         .map(allocations -> allocations.stream()
-                                .map(allocation -> PharmacyDrugAllocationDomain.fromSchema(allocation, false))
+                                .map(allocation -> PharmacyDrugAllocationDomain.fromSchema(allocation, true))
                                 .collect(Collectors.toList()))
                         .orElse(Collections.emptyList())
                         : null
