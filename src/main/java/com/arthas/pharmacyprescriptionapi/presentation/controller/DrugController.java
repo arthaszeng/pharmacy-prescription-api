@@ -25,14 +25,6 @@ public class DrugController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{batchNumber}")
-    public ResponseEntity<DrugRepresentation> getDrugByBatchNumber(@PathVariable String batchNumber) {
-        DrugRepresentation response = DrugRepresentation.fromDomain(
-                drugApplicationService.getDrugByBatchNumber(batchNumber)
-        );
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping
     public ResponseEntity<Page<DrugRepresentation>> getAllDrugs(Pageable pageable) {
         Page<DrugRepresentation> drugs = drugApplicationService.getAllDrugs(pageable)

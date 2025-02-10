@@ -1,10 +1,7 @@
 package com.arthas.pharmacyprescriptionapi.infrastructure.schema;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "pharmacy_drug_allocations")
 public class PharmacyDrugAllocationSchema {

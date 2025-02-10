@@ -22,13 +22,13 @@ public class DrugDomainService {
         return DrugDomain.fromSchema(savedDrug);
     }
 
-    public DrugDomain getDrugByBatchNumber(String batchNumber) {
-        return drugRepository.findByBatchNumber(batchNumber)
-                .map(DrugDomain::fromSchema)
-                .orElseThrow(() -> new IllegalArgumentException("Drug not found"));
-    }
-
     public Page<DrugDomain> getAllDrugs(Pageable pageable) {
         return drugRepository.findAll(pageable).map(DrugDomain::fromSchema);
+    }
+
+    public DrugDomain getDrugById(Long id) {
+        DrugSchema schema = drugRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Drug ID " + id + " does not exist"));
+        return DrugDomain.fromSchema(schema);
     }
 }

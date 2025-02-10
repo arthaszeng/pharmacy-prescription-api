@@ -11,5 +11,7 @@ public interface DrugRepositoryInterface {
 
     Optional<DrugSchema> findByBatchNumber(String batchNumber);
 
+    Optional<DrugSchema> findById(Long id);
+
     Page<DrugSchema> findAll(Pageable pageable);
 }

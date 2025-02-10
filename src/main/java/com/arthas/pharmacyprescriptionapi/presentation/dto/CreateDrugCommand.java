@@ -21,6 +21,15 @@ public class CreateDrugCommand {
     private int stock;
 
     public DrugDomain toDomain() {
-        return new DrugDomain(null, name, manufacturer, batchNumber, expiryDate, stock, LocalDateTime.now(), LocalDateTime.now(), false);
+        return DrugDomain.builder()
+                .name(name)
+                .manufacturer(manufacturer)
+                .batchNumber(batchNumber)
+                .expiryDate(expiryDate)
+                .stock(stock)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .deleted(false)
+                .build();
     }
 }

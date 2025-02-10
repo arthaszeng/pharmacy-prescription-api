@@ -1,10 +1,7 @@
 package com.arthas.pharmacyprescriptionapi.presentation.dto;
 
 import com.arthas.pharmacyprescriptionapi.domain.model.DrugDomain;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
@@ -12,6 +9,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DrugRepresentation {
     private Long id;
     private String name;
@@ -21,13 +19,13 @@ public class DrugRepresentation {
     private int stock;
 
     public static DrugRepresentation fromDomain(DrugDomain domain) {
-        return new DrugRepresentation(
-                domain.getId(),
-                domain.getName(),
-                domain.getManufacturer(),
-                domain.getBatchNumber(),
-                domain.getExpiryDate(),
-                domain.getStock()
-        );
+        return DrugRepresentation.builder()
+                .id(domain.getId())
+                .name(domain.getName())
+                .manufacturer(domain.getManufacturer())
+                .batchNumber(domain.getBatchNumber())
+                .expiryDate(domain.getExpiryDate())
+                .stock(domain.getStock())
+                .build();
     }
 }

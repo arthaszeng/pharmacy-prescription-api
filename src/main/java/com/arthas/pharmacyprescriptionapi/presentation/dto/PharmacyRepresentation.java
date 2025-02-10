@@ -1,10 +1,7 @@
 package com.arthas.pharmacyprescriptionapi.presentation.dto;
 
 import com.arthas.pharmacyprescriptionapi.domain.model.PharmacyDomain;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,20 +10,21 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class PharmacyRepresentation {
     private Long id;
     private String name;
     private List<DrugRepresentation> drugs;
 
     public static PharmacyRepresentation fromDomain(PharmacyDomain domain) {
-        return new PharmacyRepresentation(
-                domain.getId(),
-                domain.getName(),
-                domain.getAllocations() != null
+        return PharmacyRepresentation.builder()
+                .id(domain.getId())
+                .name(domain.getName())
+                .drugs(domain.getAllocations() != null
                         ? domain.getAllocations().stream()
                         .map(allocation -> DrugRepresentation.fromDomain(allocation.getDrug()))
                         .collect(Collectors.toList())
-                        : List.of()
-        );
+                        : List.of())
+                .build();
     }
 }

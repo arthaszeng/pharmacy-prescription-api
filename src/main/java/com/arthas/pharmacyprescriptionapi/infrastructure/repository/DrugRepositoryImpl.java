@@ -12,5 +12,8 @@ import java.util.Optional;
 @Repository
 public interface DrugRepositoryImpl extends JpaRepository<DrugSchema, Long>, DrugRepositoryInterface {
     Optional<DrugSchema> findByBatchNumber(String batchNumber);
+
     Page<DrugSchema> findAll(Pageable pageable);
+
+    Optional<DrugSchema> findById(Long id);
 }

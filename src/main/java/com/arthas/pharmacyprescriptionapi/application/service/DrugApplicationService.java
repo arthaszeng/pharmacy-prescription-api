@@ -19,11 +19,6 @@ public class DrugApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public DrugDomain getDrugByBatchNumber(String batchNumber) {
-        return drugDomainService.getDrugByBatchNumber(batchNumber);
-    }
-
-    @Transactional(readOnly = true)
     public Page<DrugDomain> getAllDrugs(Pageable pageable) {
         return drugDomainService.getAllDrugs(pageable);
     }

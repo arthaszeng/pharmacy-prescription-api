@@ -7,8 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PharmacyRepositoryImpl extends JpaRepository<PharmacySchema, Long>, PharmacyRepositoryInterface {
     @Override
     Page<PharmacySchema> findAll(Pageable pageable);
+
+    Optional<PharmacySchema> findById(Long id);
 }

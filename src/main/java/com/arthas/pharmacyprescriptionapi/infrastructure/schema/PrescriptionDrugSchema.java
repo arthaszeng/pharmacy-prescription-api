@@ -4,25 +4,30 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+@Entity
+@Table(name = "prescription_drugs")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "pharmacies")
-public class PharmacySchema {
+public class PrescriptionDrugSchema {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prescription_id", nullable = false)
+    private PrescriptionSchema prescription;
 
-    @OneToMany(mappedBy = "pharmacy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PharmacyDrugAllocationSchema> allocations;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "drug_id", nullable = false)
+    private DrugSchema drug;
+
+    @Column(nullable = false)
+    private int dosage;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
