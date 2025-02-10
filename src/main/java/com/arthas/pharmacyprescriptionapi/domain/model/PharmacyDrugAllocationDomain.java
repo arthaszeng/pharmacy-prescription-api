@@ -31,4 +31,8 @@ public class PharmacyDrugAllocationDomain {
                 .allocatedStock(this.allocatedStock)
                 .build();
     }
+
+    public static Long getDrugId(PharmacyDrugAllocationDomain allocationDomain) {
+        return allocationDomain.getDrug().getId();
+    }
 }

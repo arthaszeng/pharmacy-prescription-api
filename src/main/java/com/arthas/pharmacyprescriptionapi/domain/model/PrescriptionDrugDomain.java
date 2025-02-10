@@ -28,4 +28,8 @@ public class PrescriptionDrugDomain {
                 .dosage(this.dosage)
                 .build();
     }
+
+    public Long getDrugId() {
+        return getDrug().getId();
+    }
 }

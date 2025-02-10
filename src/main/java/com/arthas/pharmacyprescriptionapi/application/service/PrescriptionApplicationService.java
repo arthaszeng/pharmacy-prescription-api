@@ -27,7 +27,7 @@ public class PrescriptionApplicationService {
         PharmacyDomain pharmacy = pharmacyDomainService.getPharmacyById(prescription.getPharmacy().getId());
 
         List<PrescriptionDrugDomain> validatedDrugs = pharmacyDomainService.validateAndAllocateDrugs(
-                pharmacy.getId(), prescription.getPrescriptionDrugs()
+                pharmacy, prescription.getPrescriptionDrugs()
         );
 
         PrescriptionDomain completePrescription = PrescriptionDomain.builder()
