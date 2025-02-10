@@ -4,6 +4,7 @@ import com.arthas.pharmacyprescriptionapi.domain.model.PatientDomain;
 import com.arthas.pharmacyprescriptionapi.domain.model.PharmacyDomain;
 import com.arthas.pharmacyprescriptionapi.domain.model.PrescriptionDomain;
 import com.arthas.pharmacyprescriptionapi.domain.model.PrescriptionDrugDomain;
+import com.arthas.pharmacyprescriptionapi.domain.service.AuditLogDomainService;
 import com.arthas.pharmacyprescriptionapi.domain.service.PatientDomainService;
 import com.arthas.pharmacyprescriptionapi.domain.service.PharmacyDomainService;
 import com.arthas.pharmacyprescriptionapi.domain.service.PrescriptionDomainService;
@@ -19,6 +20,7 @@ public class PrescriptionApplicationService {
     private final PrescriptionDomainService prescriptionDomainService;
     private final PharmacyDomainService pharmacyDomainService;
     private final PatientDomainService patientDomainService;
+    private final AuditLogDomainService auditLogDomainService;
 
     @Transactional
     public PrescriptionDomain createPrescription(PrescriptionDomain prescription) {
@@ -44,14 +46,23 @@ public class PrescriptionApplicationService {
     public PrescriptionDomain fulfillPrescription(Long prescriptionId) {
         PrescriptionDomain prescription = prescriptionDomainService.getPrescriptionById(prescriptionId);
 
-        if (!prescription.getStatus().equals("PENDING")) {
+        if (!"PENDING".equals(prescription.getStatus())) {
             throw new IllegalArgumentException("Prescription ID " + prescriptionId + " is not pending fulfillment");
         }
 
-        PharmacyDomain pharmacy = pharmacyDomainService.getPharmacyById(prescription.getPharmacy().getId());
+        try {
+            PharmacyDomain pharmacy = pharmacyDomainService.getPharmacyById(prescription.getPharmacy().getId());
+            pharmacyDomainService.validateAndDeductStock(pharmacy, prescription.getPrescriptionDrugs());
 
-        pharmacyDomainService.validateAndDeductStock(pharmacy, prescription.getPrescriptionDrugs());
+            PrescriptionDomain fulfilledPrescription = prescriptionDomainService.fulfillPrescription(prescription);
 
-        return prescriptionDomainService.fulfillPrescription(prescription);
+            auditLogDomainService.logFulfillSuccess(fulfilledPrescription);
+
+            return fulfilledPrescription;
+        } catch (Exception e) {
+            auditLogDomainService.logFulfillFailure(prescription, e.getMessage());
+
+            throw e;
+        }
     }
 }
