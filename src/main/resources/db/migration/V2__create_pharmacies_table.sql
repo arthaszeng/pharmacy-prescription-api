@@ -1,6 +1,6 @@
 -- V2__create_pharmacy_table.sql
 
-CREATE TABLE PHARMACY
+CREATE TABLE pharmacies
 (
     id         SERIAL PRIMARY KEY,
     name       VARCHAR(255) NOT NULL,
@@ -9,6 +9,6 @@ CREATE TABLE PHARMACY
 );
 
 -- Insert initial pharmacy data
-INSERT INTO PHARMACY (name)
+INSERT INTO pharmacies (name)
 VALUES ('Central Pharmacy'),
        ('Downtown Pharmacy');

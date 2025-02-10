@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PHARMACY_DRUG_ALLOCATION")
+@Table(name = "pharmacy_drug_allocations")
 public class PharmacyDrugAllocationSchema {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PHARMACY")
+@Table(name = "pharmacies")
 public class PharmacySchema {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
