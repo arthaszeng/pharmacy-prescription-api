@@ -16,6 +16,7 @@ public class PharmacyDrugAllocationDomain {
     private PharmacyDomain pharmacy;
     private DrugDomain drug;
     private int allocatedStock;
+    private Long version;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -25,6 +26,7 @@ public class PharmacyDrugAllocationDomain {
                 .pharmacy(includePharmacy ? PharmacyDomain.fromSchema(schema.getPharmacy(), false) : null)
                 .drug(DrugDomain.fromSchema(schema.getDrug()))
                 .allocatedStock(schema.getAllocatedStock())
+                .version(schema.getVersion())
                 .createdAt(schema.getCreatedAt())
                 .updatedAt(schema.getUpdatedAt())
                 .build();
@@ -36,6 +38,7 @@ public class PharmacyDrugAllocationDomain {
                 .pharmacy(this.pharmacy.toSchema())
                 .drug(this.drug.toSchema())
                 .allocatedStock(this.allocatedStock)
+                .version(Optional.ofNullable(this.version).orElse(0L))
                 .createdAt(Optional.ofNullable(this.createdAt).orElse(LocalDateTime.now()))
                 .updatedAt(LocalDateTime.now())
                 .build();

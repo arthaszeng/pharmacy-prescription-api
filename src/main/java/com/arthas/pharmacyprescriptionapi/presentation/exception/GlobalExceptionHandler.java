@@ -86,6 +86,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles optimistic locking exceptions.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorRepresentation> handleOptimisticLockException(IllegalStateException ex, HttpServletRequest request) {
+        log.warn("Stock update failed due to optimistic locking: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.CONFLICT, "Stock update conflict, please try again", request.getRequestURI());
+    }
+
+    /**
      * Builds the error response entity.
      */
     private ResponseEntity<ErrorRepresentation> buildErrorResponse(HttpStatus status, String message, String path) {

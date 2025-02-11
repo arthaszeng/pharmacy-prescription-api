@@ -28,6 +28,10 @@ public class PharmacyDrugAllocationSchema {
     @Column(nullable = false)
     private int allocatedStock;
 
+    @Version
+    @Column(nullable = false)
+    private Long version = 0L;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

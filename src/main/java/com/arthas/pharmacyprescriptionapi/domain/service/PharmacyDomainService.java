@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,16 +51,30 @@ public class PharmacyDomainService {
 
     @Transactional
     public void validateAndDeductStock(PharmacyDomain pharmacy, List<PrescriptionDrugDomain> prescriptionDrugs) {
-        Map<Long, PharmacyDrugAllocationDomain> allocationMap = getAllocationMap(pharmacy);
+        int maxRetries = 3;
+        int attempt = 0;
 
-        // Validate & Deduct Stock
-        List<PharmacyDrugAllocationSchema> updatedAllocations = prescriptionDrugs.stream()
-                .map(drug -> deductStock(allocationMap, drug))
-                .map(PharmacyDrugAllocationDomain::toSchema)
-                .toList();
+        while (attempt < maxRetries) {
+            try {
+                Map<Long, PharmacyDrugAllocationDomain> allocationMap = getAllocationMap(pharmacy);
 
-        // Batch update allocations
-        allocationRepository.saveAll(updatedAllocations);
+                List<PharmacyDrugAllocationSchema> updatedAllocations = prescriptionDrugs.stream()
+                        .map(drug -> deductStock(allocationMap, drug))
+                        .map(PharmacyDrugAllocationDomain::toSchema)
+                        .toList();
+
+                allocationRepository.saveAll(updatedAllocations);
+
+                return;
+            } catch (ObjectOptimisticLockingFailureException e) {
+                attempt++;
+                log.warn("Optimistic lock conflict on stock update (attempt {}/{})", attempt, maxRetries);
+
+                if (attempt == maxRetries) {
+                    throw new IllegalStateException("Stock update failed after multiple retries. Please try again.");
+                }
+            }
+        }
     }
 
     private Map<Long, PharmacyDrugAllocationDomain> getAllocationMap(PharmacyDomain pharmacy) {
@@ -83,7 +98,8 @@ public class PharmacyDomainService {
         allocation.setUpdatedAt(LocalDateTime.now());
 
         log.info("Deducted {} units of Drug ID {} from Pharmacy ID {}. Remaining stock: {}",
-                prescriptionDrug.getDosage(), prescriptionDrug.getDrugId(), allocation.getPharmacyId(), allocation.getAllocatedStock());
+                prescriptionDrug.getDosage(), prescriptionDrug.getDrugId(),
+                allocation.getPharmacyId(), allocation.getAllocatedStock());
 
         return allocation;
     }
