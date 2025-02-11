@@ -1,5 +1,6 @@
 package com.arthas.pharmacyprescriptionapi.domain.model;
 
+import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacyDrugAllocationSchema;
 import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacySchema;
 import lombok.*;
 
@@ -46,7 +47,11 @@ public class PharmacyDomain {
                 .updatedAt(Optional.ofNullable(this.updatedAt).orElse(LocalDateTime.now()))
                 .allocations(Optional.ofNullable(this.allocations)
                         .map(allocations -> allocations.stream()
-                                .map(PharmacyDrugAllocationDomain::toSchema)
+                                .map(allocation -> {
+                                    PharmacyDrugAllocationSchema allocationSchema = allocation.toSchema();
+                                    allocationSchema.setPharmacy(null); // Avoid circular reference
+                                    return allocationSchema;
+                                })
                                 .collect(Collectors.toList()))
                         .orElse(Collections.emptyList()))
                 .build();

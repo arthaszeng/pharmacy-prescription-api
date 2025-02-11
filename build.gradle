@@ -3,7 +3,9 @@ plugins {
     id 'org.springframework.boot' version '3.4.2'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.flywaydb.flyway' version '9.22.1'
+    id 'jacoco'
 }
+
 
 group = 'com.arthas'
 version = '0.0.1-SNAPSHOT'
@@ -54,8 +56,30 @@ flyway {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy 'jacocoTestReport'
 }
 
 tasks.withType(Test).configureEach {
     jvmArgs += "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('byte-buddy-agent') }}"
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/PharmacyPrescriptionApiApplication.class',
+                    '**/presentation/controller/*.class',
+                    '**/presentation/dto/*.class'
+            ])
+        }))
+    }
 }

@@ -1,6 +1,7 @@
 package com.arthas.pharmacyprescriptionapi.domain.model;
 
 import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacyDrugAllocationSchema;
+import com.arthas.pharmacyprescriptionapi.infrastructure.schema.PharmacySchema;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -35,7 +36,7 @@ public class PharmacyDrugAllocationDomain {
     public PharmacyDrugAllocationSchema toSchema() {
         return PharmacyDrugAllocationSchema.builder()
                 .id(this.id)
-                .pharmacy(this.pharmacy.toSchema())
+                .pharmacy(PharmacySchema.builder().id(this.pharmacy.getId()).build()) // Store only ID
                 .drug(this.drug.toSchema())
                 .allocatedStock(this.allocatedStock)
                 .version(Optional.ofNullable(this.version).orElse(0L))

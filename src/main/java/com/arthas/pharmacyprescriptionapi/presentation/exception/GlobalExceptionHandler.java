@@ -5,15 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @ControllerAdvice
@@ -30,22 +27,6 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred.",
                 request.getRequestURI()
         );
-    }
-
-    /**
-     * Handles validation errors for request payloads.
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorRepresentation> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        log.warn("Validation error: {}", ex.getMessage());
-
-        List<String> details = ex.getBindingResult().getAllErrors().stream()
-                .map(error -> error instanceof FieldError fieldError
-                        ? fieldError.getField() + " " + fieldError.getDefaultMessage()
-                        : error.getDefaultMessage())
-                .collect(Collectors.toList());
-
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI(), details);
     }
 
     /**

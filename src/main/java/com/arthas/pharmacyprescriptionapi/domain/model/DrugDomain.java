@@ -20,7 +20,7 @@ public class DrugDomain {
     private int stock;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private boolean deleted;
+    private boolean deleted = false;
 
     public boolean isExpired() {
         return expiryDate.before(new Date());
