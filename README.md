@@ -190,18 +190,104 @@ POST /api/drugs
 ```json
 {
   "name": "Paracetamol",
-  "manufacturer": "ABC Pharma",
-  "batchNumber": "BATCH123",
+  "manufacturer": "XYZ Pharma",
+  "batchNumber": "B12345",
   "expiryDate": "2025-12-31",
   "stock": 100
 }
 ```
 #### **Response**
 ```json
-{"message": "Drug added successfully"}
+{
+  "id": 4,
+  "name": "Paracetamol",
+  "manufacturer": "XYZ Pharma",
+  "batchNumber": "B12345",
+  "expiryDate": "2025-12-31",
+  "stock": 100
+}
 ```
 
-### **2. Create a Prescription**
+#### **Error Response**
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Batch number already exists",
+  "path": "/api/drugs",
+  "timestamp": "2025-02-11T08:16:17.110526"
+}
+```
+
+---
+
+### **2. Get All Pharmacies and Their Contracted Drugs(Paginated)**
+```http
+GET /api/pharmacies?page=0&size=10
+```
+
+#### **Response**
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "name": "Central Pharmacy",
+      "drugs": [
+        {
+          "id": 1,
+          "name": "Paracetamol",
+          "manufacturer": "GSK",
+          "batchNumber": "GSK001",
+          "expiryDate": "2025-12-30T16:00:00.000+00:00",
+          "stock": 100
+        },
+        {
+          "id": 2,
+          "name": "Ibuprofen",
+          "manufacturer": "Bayer",
+          "batchNumber": "BAY001",
+          "expiryDate": "2025-12-30T16:00:00.000+00:00",
+          "stock": 50
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Downtown Pharmacy",
+      "drugs": [
+        {
+          "id": 1,
+          "name": "Paracetamol",
+          "manufacturer": "GSK",
+          "batchNumber": "GSK001",
+          "expiryDate": "2025-12-30T16:00:00.000+00:00",
+          "stock": 100
+        }
+      ]
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
+    "sort": {
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
+    },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  ...,
+  "numberOfElements": 2,
+  "empty": false
+}
+```
+
+---
+
+### **3. Create a Prescription**
 ```http
 POST /api/prescriptions
 ```
@@ -209,39 +295,193 @@ POST /api/prescriptions
 ```json
 {
   "patientId": 1,
-  "pharmacyId": 2,
-  "items": [
-    { "drugId": 1, "quantity": 10 }
+  "pharmacyId": 1,
+  "drugs": [
+    {
+      "drugId": 2,
+      "dosage": 10
+    },
+    {
+      "drugId": 1,
+      "dosage": 5
+    }
   ]
 }
 ```
 #### **Response**
 ```json
-{"message": "Prescription created successfully"}
+{
+  "id": 3,
+  "status": "PENDING",
+  "drugs": [
+    {
+      "drugId": 2,
+      "name": "Ibuprofen",
+      "batchNumber": "BAY001",
+      "dosage": 10
+    },
+    {
+      "drugId": 1,
+      "name": "Paracetamol",
+      "batchNumber": "GSK001",
+      "dosage": 5
+    }
+  ]
+}
 ```
 
-### **3. Fulfill a Prescription**
+#### **Error Response**
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Patient ID 3 does not exist",
+  "path": "/api/prescriptions",
+  "timestamp": "2025-02-11T08:18:13.527818"
+}
+```
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Insufficient or missing stock for Drug ID 3",
+  "path": "/api/prescriptions",
+  "timestamp": "2025-02-11T08:19:08.412024"
+}
+```
+
+---
+
+### **4. Fulfill a Prescription**
 ```http
 POST /api/prescriptions/fulfill/{id}
 ```
 #### **Response**
 ```json
-{"message": "Prescription fulfilled successfully"}
+{
+  "id": 3,
+  "status": "FULFILLED",
+  "drugs": [
+    {
+      "drugId": 2,
+      "name": "Ibuprofen",
+      "batchNumber": "BAY001",
+      "dosage": 10
+    },
+    {
+      "drugId": 1,
+      "name": "Paracetamol",
+      "batchNumber": "GSK001",
+      "dosage": 5
+    }
+  ]
+}
 ```
 
-### **4. Get Audit Logs**
+#### **Error Response**
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Insufficient or missing stock for Drug ID 1",
+  "path": "/api/prescriptions/4/fulfill",
+  "timestamp": "2025-02-11T08:11:48.375382"
+}
+```
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Prescription ID 5 does not exist.",
+  "path": "/api/prescriptions/5/fulfill",
+  "timestamp": "2025-02-11T08:15:15.885331"
+}
+```
+
+---
+
+### **5. Get Audit Logs**
 ```http
-GET /api/audit-logs
+GET /api/audit-logs?patientId=1&pharmacyId=1
 ```
 #### **Response**
 ```json
-[
-  {
-    "prescriptionId": 1,
-    "status": "SUCCESS",
-    "timestamp": "2025-02-09T10:30:00Z"
-  }
-]
+{
+  "content": [
+    {
+      "id": 1,
+      "prescriptionId": 3,
+      "patientId": 1,
+      "pharmacyId": 1,
+      "status": "SUCCESS",
+      "failureReason": "N/A",
+      "requestedDrugs": [
+        {
+          "name": "Ibuprofen",
+          "drugId": 2,
+          "quantity": 10
+        },
+        {
+          "name": "Paracetamol",
+          "drugId": 1,
+          "quantity": 5
+        }
+      ],
+      "dispensedDrugs": [
+        {
+          "name": "Ibuprofen",
+          "drugId": 2,
+          "quantity": 10
+        },
+        {
+          "name": "Paracetamol",
+          "drugId": 1,
+          "quantity": 5
+        }
+      ],
+      "createdAt": "2025-02-11T08:07:52.906442"
+    },
+    {
+      "id": 2,
+      "prescriptionId": 4,
+      "patientId": 1,
+      "pharmacyId": 1,
+      "status": "FAILURE",
+      "failureReason": "Insufficient or missing stock for Drug ID 1",
+      "requestedDrugs": [
+        {
+          "name": "Ibuprofen",
+          "drugId": 2,
+          "quantity": 3
+        },
+        {
+          "name": "Paracetamol",
+          "drugId": 1,
+          "quantity": 5
+        }
+      ],
+      "dispensedDrugs": [],
+      "createdAt": "2025-02-11T08:11:29.785731"
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20,
+    "sort": {
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
+    },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  ...,
+  "numberOfElements": 2,
+  "empty": false
+}
 ```
 
 ---
