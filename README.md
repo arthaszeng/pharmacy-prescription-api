@@ -488,6 +488,14 @@ Run unit tests using JUnit:
 ./gradlew test
 ```
 
+Generate test coverage report:
+```sh
+./gradlew clean test jacocoTestReport
+```
+
+## **Test Coverage**
+![test_coverage.png](doc/test_coverage.png)
+
 ---
 
 ## 📌 Linting & Code Quality
