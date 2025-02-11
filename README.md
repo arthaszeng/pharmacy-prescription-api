@@ -88,6 +88,22 @@ java/com/arthas/pharmacyprescriptionapi
  │   │   ├── DrugControllerTest.java
  ```
 
+## **Concurrency Control Strategies for Stock Deduction**
+
+| Strategy                  | Suitable Scenario      | Concurrency Control | Performance Impact | Best Use Case |
+|---------------------------|-----------------------|---------------------|--------------------|---------------|
+| **Optimistic Locking**    | Read-heavy workloads, occasional conflicts | Version control (`version` field) + retry mechanism | Low | High-performance systems with moderate contention |
+| **Pessimistic Locking**   | High-contention scenarios | Transaction-level locks (`SELECT ... FOR UPDATE`) | High | Small-scale systems with limited stock updates |
+| **Transaction Isolation** | Prevents dirty reads, avoids inconsistency | Database isolation levels (e.g., `REPEATABLE READ`) | Medium | General stock management where moderate consistency is needed |
+| **Distributed Locking**   | Multi-instance distributed environments | Redis/Zookeeper-based locking | Medium | Scenarios with multiple service nodes updating shared stock |
+| **Event-Driven Approach** | High-throughput, large-scale systems | Message queues (Kafka/RabbitMQ) for async processing | Low | Large-scale inventory systems that require eventual consistency |
+
+### **Tech Consideration: Choose Optimistic Locking**
+In our system, **Optimistic Locking** is the best fit for handling stock updates efficiently. Since we operate in a **high-performance environment with moderate contention**, using a `version` field along with retry logic ensures **data consistency without introducing unnecessary locking overhead**. </br>
+Additionally, we leverage **transaction isolation (`REPEATABLE READ`)** to prevent inconsistent reads while keeping the system scalable. This approach minimizes database contention, allowing multiple users to interact with the inventory system concurrently without significant performance degradation. </br>
+
+--- 
+
 ## 🏗️ Setup Instructions
 ### 1️⃣ Prerequisites
 Ensure you have the following installed:
