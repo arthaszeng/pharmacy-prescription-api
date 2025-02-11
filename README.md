@@ -33,37 +33,17 @@ This project follows **Onion Architecture**, **Domain-Driven Design (DDD)**, and
 
 ---
 
-## 📌 RESTful API Capability Table
+## 📌 RESTful API Capability
 
 ### ✅ Implemented APIs
 
 #### **Drug Management**
-| **Feature** | **HTTP Method** | **Endpoint** | **Request Parameters** | **Request Body** | **Response** |
-|------------|---------------|-------------|----------------|---------------|-------------|
-| **Add a Drug** | `POST` | `/api/drugs` | None | `{ "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` | `{ "id": 1, "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` |
-| **Get All Drugs (Paginated)** | `GET` | `/api/drugs?page=X&size=Y` | `page` (default: 0), `size` (default: 10) | None | `{ "content": [{ "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 100 }], "totalElements": 100, "totalPages": 10, "size": 10 }` |
-| **Get Drug by Batch Number** | `GET` | `/api/drugs/{batchNumber}` | `batchNumber` | None | `{ "id": 1, "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` |
-
----
-
-#### **Pharmacy Management**
-| **Feature** | **HTTP Method** | **Endpoint** | **Request Parameters** | **Request Body** | **Response** |
-|------------|---------------|-------------|----------------|---------------|-------------|
-| **Retrieve All Pharmacies (Paginated)** | `GET` | `/api/pharmacies` | `page=0&size=10` | None | `{ "content": [ { "id": 1, "name": "Central Pharmacy", "drugs": [ { "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 100 } ] }], "totalElements": 25, "totalPages": 3, "size": 10, "number": 0 }` |
-
----
-
-#### **Prescription Management**
-| **Feature** | **HTTP Method** | **Endpoint** | **Request Parameters** | **Request Body** | **Response** |
-|------------|---------------|-------------|----------------|---------------|-------------|
-| **Create a Prescription** | `POST` | `/api/prescriptions` | None | `{ "patientId": 1, "pharmacyId": 2, "drugs": [ { "drugId": 101, "dosage": 2 }, { "drugId": 102, "dosage": 1 } ] }` | `{ "id": 1, "status": "PENDING", "drugs": [ { "id": 101, "name": "Paracetamol", "dosage": 2 }, { "id": 102, "name": "Ibuprofen", "dosage": 1 } ] }` |
-| **Fulfill a Prescription** | `POST` | `/api/prescriptions/{prescriptionId}/fulfill` | `prescriptionId` | None | `{ "id": 1, "status": "FULFILLED", "drugs": [ { "id": 101, "name": "Paracetamol", "dosage": 2 }, { "id": 102, "name": "Ibuprofen", "dosage": 1 } ] }` |
-
----
-
-#### **Audit & Logs**
-| **Feature** | **HTTP Method** | **Endpoint** | **Request Parameters** | **Request Body** | **Response** |
-|------------|---------------|-------------|----------------|---------------|-------------|
+| **Feature** | **HTTP Method** | **Endpoint** | **Request Parameters**                            | **Request Body** | **Response** |
+|------------|---------------|-------------|---------------------------------------------------|---------------|-------------|
+| **Add a Drug** | `POST` | `/api/drugs` | None                                              | `{ "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` | `{ "id": 1, "name": "Paracetamol", "manufacturer": "XYZ Pharma", "batchNumber": "B123", "expiryDate": "2026-12-31", "stock": 100 }` |
+| **Retrieve All Pharmacies (Paginated)** | `GET` | `/api/pharmacies` | `page=X&size=Y`                                   | None | `{ "content": [ { "id": 1, "name": "Central Pharmacy", "drugs": [ { "id": 1, "name": "Paracetamol", "batchNumber": "B123", "stock": 100 } ] }], "totalElements": 25, "totalPages": 3, "size": 10, "number": 0 }` |
+| **Create a Prescription** | `POST` | `/api/prescriptions` | None                                              | `{ "patientId": 1, "pharmacyId": 2, "drugs": [ { "drugId": 101, "dosage": 2 }, { "drugId": 102, "dosage": 1 } ] }` | `{ "id": 1, "status": "PENDING", "drugs": [ { "id": 101, "name": "Paracetamol", "dosage": 2 }, { "id": 102, "name": "Ibuprofen", "dosage": 1 } ] }` |
+| **Fulfill a Prescription** | `POST` | `/api/prescriptions/{prescriptionId}/fulfill` | `prescriptionId`                                  | None | `{ "id": 1, "status": "FULFILLED", "drugs": [ { "id": 101, "name": "Paracetamol", "dosage": 2 }, { "id": 102, "name": "Ibuprofen", "dosage": 1 } ] }` |
 | **Get Audit Logs (Filtered)** | `GET` | `/api/audit-logs` | `patientId=X&pharmacyId=Y&status=SUCCESS/FAILURE` | None | `{ "logs": [ { "prescriptionId": 1, "patientId": 1, "pharmacyId": 2, "status": "FULFILLED", "timestamp": "2025-02-11T01:08:02.137932" } ] }` |
 
 ---
