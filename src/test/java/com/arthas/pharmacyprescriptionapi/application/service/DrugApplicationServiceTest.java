@@ -4,17 +4,24 @@ import com.arthas.pharmacyprescriptionapi.domain.model.DrugDomain;
 import com.arthas.pharmacyprescriptionapi.domain.service.DrugDomainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class DrugApplicationServiceTest {
 
     @Mock
@@ -23,32 +30,75 @@ class DrugApplicationServiceTest {
     @InjectMocks
     private DrugApplicationService drugApplicationService;
 
+    private DrugDomain sampleDrug;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        sampleDrug = DrugDomain.builder()
+                .id(1L)
+                .name("Paracetamol")
+                .manufacturer("GSK")
+                .batchNumber("GSK001")
+                .expiryDate(new Date(2025, 12, 31))
+                .stock(100)
+                .build();
     }
 
     @Test
-    void testAddDrug_Success() {
-        DrugDomain drug = new DrugDomain(
-                null, "Paracetamol", "XYZ Pharma", "B123",
-                new Date(), 100, LocalDateTime.now(), LocalDateTime.now(), false
-        );
+    void shouldAddDrugSuccessfully() {
+        // Arrange
+        when(drugDomainService.addDrug(sampleDrug)).thenReturn(sampleDrug);
 
-        DrugDomain savedDrug = new DrugDomain(
-                1L, "Paracetamol", "XYZ Pharma", "B123",
-                new Date(), 100, LocalDateTime.now(), LocalDateTime.now(), false
-        );
+        // Act
+        DrugDomain result = drugApplicationService.addDrug(sampleDrug);
 
-        when(drugDomainService.addDrug(any())).thenReturn(savedDrug);
+        // Assert
+        assertThat(result).isEqualTo(sampleDrug);
+        verify(drugDomainService, times(1)).addDrug(sampleDrug);
+    }
 
-        DrugDomain result = drugApplicationService.addDrug(drug);
+    @Test
+    void shouldThrowExceptionWhenAddingNullDrug() {
+        // Arrange
+        doThrow(new IllegalArgumentException("Drug cannot be null"))
+                .when(drugDomainService).addDrug(null);
 
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("Paracetamol", result.getName());
-        assertEquals("B123", result.getBatchNumber());
+        // Act & Assert
+        assertThatThrownBy(() -> drugApplicationService.addDrug(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Drug cannot be null");
 
-        verify(drugDomainService, times(1)).addDrug(any());
+        verify(drugDomainService, times(1)).addDrug(null);
+    }
+
+    @Test
+    void shouldRetrieveAllDrugsSuccessfully() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DrugDomain> drugPage = new PageImpl<>(List.of(sampleDrug));
+        when(drugDomainService.getAllDrugs(pageable)).thenReturn(drugPage);
+
+        // Act
+        Page<DrugDomain> result = drugApplicationService.getAllDrugs(pageable);
+
+        // Assert
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(sampleDrug);
+        verify(drugDomainService, times(1)).getAllDrugs(pageable);
+    }
+
+    @Test
+    void shouldReturnEmptyPageWhenNoDrugsAvailable() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DrugDomain> emptyPage = new PageImpl<>(Collections.emptyList());
+        when(drugDomainService.getAllDrugs(pageable)).thenReturn(emptyPage);
+
+        // Act
+        Page<DrugDomain> result = drugApplicationService.getAllDrugs(pageable);
+
+        // Assert
+        assertThat(result.getContent()).isEmpty();
+        verify(drugDomainService, times(1)).getAllDrugs(pageable);
     }
 }

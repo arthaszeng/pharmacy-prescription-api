@@ -5,16 +5,20 @@ import com.arthas.pharmacyprescriptionapi.domain.repository.DrugRepositoryInterf
 import com.arthas.pharmacyprescriptionapi.infrastructure.schema.DrugSchema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class DrugDomainServiceTest {
@@ -30,44 +34,137 @@ class DrugDomainServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testAddDrug_Success() {
-        DrugDomain drug = new DrugDomain(
-                null, "Paracetamol", "XYZ Pharma", "B123",
-                new Date(), 100, LocalDateTime.now(), LocalDateTime.now(), false
-        );
+    private DrugDomain createMockDrugDomain() {
+        return DrugDomain.builder()
+                .id(1L)
+                .name("Paracetamol")
+                .manufacturer("GSK")
+                .batchNumber("GSK001")
+                .expiryDate(new Date())
+                .stock(100)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .deleted(false)
+                .build();
+    }
 
-        DrugSchema savedSchema = drug.toSchema();
-        savedSchema.setId(1L);
-
-        when(drugRepository.findByBatchNumber("B123")).thenReturn(Optional.empty());
-        when(drugRepository.save(any())).thenReturn(savedSchema);
-
-        DrugDomain savedDrug = drugDomainService.addDrug(drug);
-
-        assertNotNull(savedDrug);
-        assertEquals("Paracetamol", savedDrug.getName());
-        assertEquals("XYZ Pharma", savedDrug.getManufacturer());
-        assertEquals("B123", savedDrug.getBatchNumber());
-
-        ArgumentCaptor<DrugSchema> captor = ArgumentCaptor.forClass(DrugSchema.class);
-        verify(drugRepository).save(captor.capture());
-
-        assertEquals("Paracetamol", captor.getValue().getName());
+    private DrugSchema createMockDrugSchema() {
+        return DrugSchema.builder()
+                .id(1L)
+                .name("Paracetamol")
+                .manufacturer("GSK")
+                .batchNumber("GSK001")
+                .expiryDate(new Date())
+                .stock(100)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .deleted(false)
+                .build();
     }
 
     @Test
-    void testAddDrug_BatchNumberExists() {
-        DrugDomain drug = new DrugDomain(
-                null, "Paracetamol", "XYZ Pharma", "B123",
-                new Date(), 100, LocalDateTime.now(), LocalDateTime.now(), false
-        );
+    void shouldAddNewDrugSuccessfully() {
+        // Arrange
+        DrugDomain drug = createMockDrugDomain();
+        DrugSchema savedSchema = createMockDrugSchema();
 
-        when(drugRepository.findByBatchNumber("B123")).thenReturn(Optional.of(new DrugSchema()));
+        when(drugRepository.findByBatchNumber(drug.getBatchNumber())).thenReturn(Optional.empty());
+        when(drugRepository.save(any(DrugSchema.class))).thenReturn(savedSchema);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> drugDomainService.addDrug(drug));
-        assertEquals("Batch number already exists", exception.getMessage());
+        // Act
+        DrugDomain result = drugDomainService.addDrug(drug);
 
-        verify(drugRepository, never()).save(any());
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getName()).isEqualTo("Paracetamol");
+        assertThat(result.getBatchNumber()).isEqualTo("GSK001");
+
+        verify(drugRepository, times(1)).findByBatchNumber(drug.getBatchNumber());
+        verify(drugRepository, times(1)).save(any(DrugSchema.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenBatchNumberAlreadyExists() {
+        // Arrange
+        DrugDomain drug = createMockDrugDomain();
+        when(drugRepository.findByBatchNumber(drug.getBatchNumber())).thenReturn(Optional.of(createMockDrugSchema()));
+
+        // Act & Assert
+        assertThatThrownBy(() -> drugDomainService.addDrug(drug))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Batch number already exists");
+
+        verify(drugRepository, times(1)).findByBatchNumber(drug.getBatchNumber());
+        verify(drugRepository, never()).save(any(DrugSchema.class));
+    }
+
+    @Test
+    void shouldGetAllDrugsSuccessfully() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DrugSchema> mockPage = new PageImpl<>(java.util.List.of(createMockDrugSchema()));
+
+        when(drugRepository.findAll(pageable)).thenReturn(mockPage);
+
+        // Act
+        Page<DrugDomain> result = drugDomainService.getAllDrugs(pageable);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getName()).isEqualTo("Paracetamol");
+
+        verify(drugRepository, times(1)).findAll(pageable);
+    }
+
+    @Test
+    void shouldReturnEmptyPageWhenNoDrugsAvailable() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DrugSchema> emptyPage = Page.empty();
+
+        when(drugRepository.findAll(pageable)).thenReturn(emptyPage);
+
+        // Act
+        Page<DrugDomain> result = drugDomainService.getAllDrugs(pageable);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty();
+
+        verify(drugRepository, times(1)).findAll(pageable);
+    }
+
+    @Test
+    void shouldGetDrugByIdSuccessfully() {
+        // Arrange
+        Long drugId = 1L;
+        DrugSchema mockSchema = createMockDrugSchema();
+        when(drugRepository.findById(drugId)).thenReturn(Optional.of(mockSchema));
+
+        // Act
+        DrugDomain result = drugDomainService.getDrugById(drugId);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getName()).isEqualTo("Paracetamol");
+
+        verify(drugRepository, times(1)).findById(drugId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDrugNotFoundById() {
+        // Arrange
+        Long drugId = 99L;
+        when(drugRepository.findById(drugId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> drugDomainService.getDrugById(drugId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Drug ID 99 does not exist");
+
+        verify(drugRepository, times(1)).findById(drugId);
     }
 }

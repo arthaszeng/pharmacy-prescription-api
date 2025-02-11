@@ -60,7 +60,7 @@ public class AuditLogDomainService {
                 .status(status)
                 .failureReason(failureReason)
                 .requestedDrugs(drugs)
-                .dispensedDrugs(status.equals("SUCCESS") ? drugs : List.of()) // 失败时不记录分发药品
+                .dispensedDrugs(status.equals("SUCCESS") ? drugs : List.of())
                 .createdAt(prescription.getCreatedAt())
                 .build();
     }
