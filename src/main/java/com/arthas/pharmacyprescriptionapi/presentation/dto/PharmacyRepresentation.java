@@ -22,7 +22,7 @@ public class PharmacyRepresentation {
                 .name(domain.getName())
                 .drugs(domain.getAllocations() != null
                         ? domain.getAllocations().stream()
-                        .map(allocation -> DrugRepresentation.fromDomain(allocation.getDrug()))
+                        .map(allocation -> DrugRepresentation.fromDomain(allocation.getDrug(), allocation.getAllocatedStock()))
                         .collect(Collectors.toList())
                         : List.of())
                 .build();

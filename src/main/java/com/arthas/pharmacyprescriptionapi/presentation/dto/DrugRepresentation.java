@@ -18,14 +18,14 @@ public class DrugRepresentation {
     private Date expiryDate;
     private int stock;
 
-    public static DrugRepresentation fromDomain(DrugDomain domain) {
+    public static DrugRepresentation fromDomain(DrugDomain drug, int allocatedStock) {
         return DrugRepresentation.builder()
-                .id(domain.getId())
-                .name(domain.getName())
-                .manufacturer(domain.getManufacturer())
-                .batchNumber(domain.getBatchNumber())
-                .expiryDate(domain.getExpiryDate())
-                .stock(domain.getStock())
+                .id(drug.getId())
+                .name(drug.getName())
+                .manufacturer(drug.getManufacturer())
+                .batchNumber(drug.getBatchNumber())
+                .expiryDate(drug.getExpiryDate())
+                .stock(allocatedStock)
                 .build();
     }
 }

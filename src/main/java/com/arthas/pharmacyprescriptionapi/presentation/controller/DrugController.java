@@ -1,6 +1,7 @@
 package com.arthas.pharmacyprescriptionapi.presentation.controller;
 
 import com.arthas.pharmacyprescriptionapi.application.service.DrugApplicationService;
+import com.arthas.pharmacyprescriptionapi.domain.model.DrugDomain;
 import com.arthas.pharmacyprescriptionapi.presentation.dto.CreateDrugCommand;
 import com.arthas.pharmacyprescriptionapi.presentation.dto.DrugRepresentation;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,8 @@ public class DrugController {
 
     @PostMapping
     public ResponseEntity<DrugRepresentation> addDrug(@RequestBody CreateDrugCommand command) {
-        DrugRepresentation response = DrugRepresentation.fromDomain(
-                drugApplicationService.addDrug(command.toDomain())
-        );
+        DrugDomain drug = drugApplicationService.addDrug(command.toDomain());
+        DrugRepresentation response = DrugRepresentation.fromDomain(drug, drug.getStock());
 
         return ResponseEntity.ok(response);
     }
@@ -28,7 +28,7 @@ public class DrugController {
     @GetMapping
     public ResponseEntity<Page<DrugRepresentation>> getAllDrugs(Pageable pageable) {
         Page<DrugRepresentation> drugs = drugApplicationService.getAllDrugs(pageable)
-                .map(DrugRepresentation::fromDomain);
+                .map(drug -> DrugRepresentation.fromDomain(drug, drug.getStock()));
         return ResponseEntity.ok(drugs);
     }
 }
